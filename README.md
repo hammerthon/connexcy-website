@@ -16,15 +16,14 @@ A static site (plain HTML, CSS and JavaScript). No build step, no database to ru
 - Contact email: `hello@connexcy.com` throughout, plus `CONTACT_EMAIL` in `assets/main.js`.
 
 ## Forms (beta signups and guide requests)
-The forms are set up for **Netlify Forms**. Deploy on Netlify and submissions show up in
-the Netlify dashboard (Forms tab) with timestamps; turn on email notifications there.
-To use another service (Formspree, HubSpot, etc.), put its URL in `FORM_ENDPOINT` in `assets/main.js`.
-When you open the site locally, forms only pretend to send (they log to the browser console).
+Forms send to the Connexcy app at `https://app.connexcy.com/api/leads` (`FORM_ENDPOINT` in `assets/main.js`).
+Submissions appear on the app's **Website leads** page and are emailed to `LEADS_NOTIFY_EMAIL`.
+The forms only work once the app is online at app.connexcy.com.
 
-The "Top 10 Vendor Renewal Mistakes" guide itself still needs to be written. Send it from
-Netlify's notification email or your email tool.
+The "Top 10 Vendor Renewal Mistakes" guide itself still needs to be written.
 
-## Deploy
-1. Drag the `connexy-site` folder onto https://app.netlify.com/drop (or connect a Git repo).
-2. In Netlify, add the custom domain `connexcy.com` and follow its DNS instructions.
-3. Submit `https://connexcy.com/sitemap.xml` in Google Search Console.
+## Hosting
+GitHub Pages serves this repo's `main` branch at https://connexcy.com (the `CNAME` file sets the domain).
+Push a change and it's live in about a minute. DNS is at GoDaddy: four `A` records for `@` pointing to
+185.199.108–111.153 and `www` as a `CNAME` to `hammerthon.github.io`.
+Submit `https://connexcy.com/sitemap.xml` in Google Search Console.

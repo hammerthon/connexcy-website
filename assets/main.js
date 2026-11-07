@@ -2,11 +2,10 @@
 
 /*
  * FORM SUBMISSIONS
- * Forms are set up for Netlify Forms (data-netlify="true"): deploy to Netlify and
- * submissions appear in the Netlify dashboard with timestamps, no backend needed.
- * To use another service (Formspree, Basin, your own API), set FORM_ENDPOINT to its URL.
+ * Beta signups and guide requests are sent to the Connexcy app, which stores them
+ * (Website leads page) and emails the team.
  */
-const FORM_ENDPOINT = ""; // e.g. "https://formspree.io/f/xxxxxx"; empty = Netlify Forms
+const FORM_ENDPOINT = "https://app.connexcy.com/api/leads";
 const CONTACT_EMAIL = "hello@connexcy.com";
 
 (function () {
