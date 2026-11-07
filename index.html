@@ -43,6 +43,7 @@
     <ul class="nav-links">
       <li><a href="features.html">Features</a></li>
       <li><a href="index.html#how">How it works</a></li>
+      <li><a href="index.html#approvals">Approvals</a></li>
       <li><a href="pricing.html">Pricing</a></li>
       <li><a href="index.html#calculator">Savings calculator</a></li>
       <li><a href="index.html#faq">FAQ</a></li>
@@ -215,6 +216,60 @@
         <strong>Coming soon:</strong> price benchmarking, a negotiation email generator, and cost forecasting.
         <a href="features.html">See all features →</a>
       </p>
+    </div>
+  </section>
+
+  <!-- APPROVALS -->
+  <section class="section" id="approvals">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow">Approval hierarchy</span>
+        <h2>Everyone can see who's next. Nobody gets stuck.</h2>
+        <p>Every quote and renewal moves through your approval chain, in order. You can see who approved, who's reviewing now, and who's up next. One click sends a friendly nudge.</p>
+      </div>
+
+      <div class="appr-demo reveal">
+        <div class="appr-card">
+          <div class="appr-top">
+            <div><strong>ShieldPoint Security</strong> <span class="appr-muted">· Endpoint protection renewal</span></div>
+            <div class="appr-amt">$45,300/yr</div>
+          </div>
+          <div class="appr-progress"><span style="width:66%"></span></div>
+          <ol class="appr-chain">
+            <li class="done">
+              <span class="pav" style="--c:#f59e0b">JL<i class="ok">✓</i></span>
+              <b>Jordan</b><small>IT Manager</small><em>Approved Mon</em>
+              <q>Needed for the new office.</q>
+            </li>
+            <li class="done">
+              <span class="pav" style="--c:#ec4899">SP<i class="ok">✓</i></span>
+              <b>Sam</b><small>Controller</small><em>Approved Tue</em>
+              <q>Within the Security budget.</q>
+            </li>
+            <li class="now">
+              <span class="pav" style="--c:#14b8a6">AM<i class="wait">⏳</i></span>
+              <b>Alex</b><small>CEO</small><em>Reviewing now</em>
+              <button type="button" class="nudge-btn" data-nudge>👋 Nudge Alex</button>
+            </li>
+          </ol>
+          <div class="appr-toast" role="status" hidden>👋 Nudge sent! Alex got an email and a notification.</div>
+        </div>
+
+        <div class="appr-side">
+          <div class="appr-tiers">
+            <h3>Who approves what</h3>
+            <div class="tier-row"><span class="tier-amt">Under $10k</span><span class="pav sm" style="--c:#f59e0b">JL</span></div>
+            <div class="tier-row"><span class="tier-amt">$10k – $40k</span><span class="pav sm" style="--c:#f59e0b">JL</span><span class="arr">→</span><span class="pav sm" style="--c:#ec4899">SP</span></div>
+            <div class="tier-row"><span class="tier-amt">$40k+</span><span class="pav sm" style="--c:#f59e0b">JL</span><span class="arr">→</span><span class="pav sm" style="--c:#ec4899">SP</span><span class="arr">→</span><span class="pav sm" style="--c:#14b8a6">AM</span></div>
+          </div>
+          <ul class="appr-points">
+            <li><b>Approval history per contract.</b> See who approved every renewal, when, and what they said.</li>
+            <li><b>Upcoming approvals.</b> See who will need to sign off on renewals before they're due.</li>
+            <li><b>Nudges and notifications.</b> Ping whoever it's waiting on, by email and in the app.</li>
+            <li><b>Rules by amount.</b> Small renewals go to one person, big ones go up the chain.</li>
+          </ul>
+        </div>
+      </div>
     </div>
   </section>
 

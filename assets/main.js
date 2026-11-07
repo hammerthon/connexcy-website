@@ -63,6 +63,18 @@ const CONTACT_EMAIL = "hello@connexcy.com";
     update();
   }
 
+  // Approval preview: demo nudge button (no data is sent)
+  document.querySelectorAll("[data-nudge]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const wrap = btn.closest(".appr-card, .feature-visual");
+      const toast = wrap && wrap.querySelector(".appr-toast");
+      btn.textContent = "✓ Nudged";
+      btn.classList.add("sent");
+      btn.disabled = true;
+      if (toast) toast.hidden = false;
+    });
+  });
+
   // Pre-select demo vs beta from URL (?type=demo)
   const typeSelect = document.querySelector("#signup-type");
   if (typeSelect) {

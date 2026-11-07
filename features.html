@@ -168,6 +168,29 @@
         </div>
       </div>
 
+      <div class="feature-row reveal" id="approvals">
+        <div>
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="12" cy="18" r="3"/><path d="M8.5 7.5 11 15.5M15.5 7.5 13 15.5"/></svg></div>
+          <h2>Approval hierarchy</h2>
+          <p>Quotes and renewals go through your approval chain in order, and everyone can see where each one stands.</p>
+          <ul class="checklist">
+            <li>Approval rules by amount and category (e.g. IT Manager → Controller → CEO over $40k)</li>
+            <li>Profile photos show who approved, who's reviewing now and who's up next</li>
+            <li>Approval history on every contract, including who approved last</li>
+            <li>One-click nudges by email and in-app notification</li>
+            <li>A heads-up on who will need to approve upcoming renewals</li>
+          </ul>
+        </div>
+        <div class="feature-visual">
+          <ol class="appr-chain compact">
+            <li class="done"><span class="pav" style="--c:#f59e0b">JL<i class="ok">✓</i></span><b>Jordan</b><small>IT Manager</small></li>
+            <li class="done"><span class="pav" style="--c:#ec4899">SP<i class="ok">✓</i></span><b>Sam</b><small>Controller</small></li>
+            <li class="now"><span class="pav" style="--c:#14b8a6">AM<i class="wait">⏳</i></span><b>Alex</b><small>CEO</small><button type="button" class="nudge-btn" data-nudge>👋 Nudge</button></li>
+          </ol>
+          <div class="appr-toast" role="status" hidden>👋 Nudge sent to Alex!</div>
+        </div>
+      </div>
+
       <div class="feature-row reveal" id="team">
         <div>
           <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg></div>
