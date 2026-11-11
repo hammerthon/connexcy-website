@@ -9,6 +9,22 @@ const FORM_ENDPOINT = "https://app.connexcy.com/api/leads";
 const CONTACT_EMAIL = "hello@connexcy.com";
 
 (function () {
+  // Intro: while it shows, a click, tap, key or scroll skips it. Once it has faded, take it out of
+  // the page. If the fade never runs (some embedded browsers don't animate), remove it anyway
+  // 3 seconds after the page is visible, so it can never stay over the content.
+  const intro = document.querySelector(".intro");
+  if (intro && getComputedStyle(intro).display !== "none") {
+    intro.addEventListener("animationend", (e) => {
+      if (e.target === intro && (e.animationName === "intro-out" || e.animationName === "intro-skip")) intro.remove();
+    });
+    const skip = () => intro.classList.add("intro-skip");
+    intro.addEventListener("click", skip);
+    ["keydown", "wheel", "touchstart"].forEach((type) => window.addEventListener(type, skip, { once: true, passive: true }));
+    const removeLater = () => setTimeout(() => intro.remove(), 3000);
+    if (document.visibilityState === "visible") removeLater();
+    else document.addEventListener("visibilitychange", removeLater, { once: true });
+  }
+
   // Mobile menu
   const header = document.querySelector(".site-header");
   const toggle = document.querySelector(".menu-toggle");
