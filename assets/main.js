@@ -25,6 +25,26 @@ const CONTACT_EMAIL = "hello@connexcy.com";
     else document.addEventListener("visibilitychange", removeLater, { once: true });
   }
 
+  // Explainer video (home page): show the big "Watch" button over the poster; it starts the video and gets out of
+  // the way, leaving the native controls.
+  document.querySelectorAll(".video-frame").forEach((frame) => {
+    const video = frame.querySelector("video");
+    const play = frame.querySelector(".video-play");
+    if (!video || !play) return;
+    // The poster shows only the button; the native controls come back once the video starts.
+    play.hidden = false;
+    video.controls = false;
+    const start = () => {
+      frame.classList.add("is-playing");
+      video.controls = true;
+      const p = video.play();
+      if (p && p.catch) p.catch(() => {});
+      video.focus();
+    };
+    play.addEventListener("click", start);
+    video.addEventListener("play", () => { frame.classList.add("is-playing"); video.controls = true; });
+  });
+
   // Mobile menu
   const header = document.querySelector(".site-header");
   const toggle = document.querySelector(".menu-toggle");
