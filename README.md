@@ -12,7 +12,7 @@ A static site (plain HTML, CSS and JavaScript). No build step, no database to ru
 - Prices: edit the numbers in `pricing.html` (Starter $49/mo, Growth $199/mo).
 - Colors and fonts: the variables at the top of `assets/styles.css` (the "Electric blue" colors; `--logo-main` and `--logo-accent` color the logo).
 - Testimonials: replace the `[placeholder]` cards on the home page and remove the "Placeholder" tags.
-- LinkedIn link: in the footer of every page (`https://www.linkedin.com/`).
+- LinkedIn link: in the footer of every page (`https://www.linkedin.com/company/connexcy/`).
 - Contact email: `hello@connexcy.com` throughout, plus `CONTACT_EMAIL` in `assets/main.js`.
 
 ## Logo and intro
