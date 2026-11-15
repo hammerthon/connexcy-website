@@ -6,6 +6,8 @@ A static site (plain HTML, CSS and JavaScript). No build step, no database to ru
 - `index.html`: Home (hero, dashboard preview, problems, how it works, features, savings calculator, free guide, testimonials, FAQ)
 - `features.html`, `pricing.html`, `beta.html` (beta / demo form), `about.html`
 - `privacy.html`, `terms.html`: placeholders, have an attorney review them before launch
+- `industries/index.html` (all six industries) and one page per industry: `industries/saas.html`, `ecommerce.html`,
+  `restaurants.html`, `healthcare.html`, `financial-services.html`, `professional-services.html` (see "Industries" below)
 
 ## Editing
 - Text: edit the HTML files directly.
@@ -55,7 +57,26 @@ The home page's "See it in under 3 minutes" section (`#video`, linked from the h
 page's `<head>` (its `duration`) and the length on the "Watch the video" button must match the video. The video is made in `/Users/hammer/connexcy-video` (see its README); after
 re-rendering it there, copy `out/connexcy-explainer.mp4` and `out/captions.vtt` here under the names above, and
 re-export the poster if the logo frame changed. The "Watch" button and its behaviour are in `assets/main.js` and the
-end of `assets/styles.css`; without JavaScript the video shows its normal controls.
+"Explainer video" part of `assets/styles.css`; without JavaScript the video shows its normal controls.
+
+## Industries
+Every page's header has an "Industries" menu right after "Features" (a button that opens a panel on desktop; a
+plain list in the mobile menu); its code is in `assets/main.js` and `assets/styles.css`, and its links are repeated
+in each page's header, so change all of them together. The footer's Product column links to `industries/index.html`.
+Pages inside `industries/` reach the rest of the site with `../`.
+
+- Content: every figure, vendor, person, title and narration line on the industry pages comes from
+  `/Users/hammer/connexcy-industry-videos/industries.json`, the same file the industry videos are made from, so the
+  pages and the films match. Change the JSON first, then the pages. Each page shows the JSON's `disclaimer` under the
+  video and under the walk-through. The pages claim only what the rest of the site claims (no compliance
+  certifications for Connexcy).
+- Videos: each page plays `assets/industries/<slug>.mp4` with captions `assets/industries/<slug>.vtt` and poster
+  `assets/industries/<slug>-poster.jpg` (18 files for the six industries). They are made in
+  `/Users/hammer/connexcy-industry-videos`; copy each render here under those names. The "Watch the video" button
+  works the same way as the home page's.
+- The transcript under each video (the JSON's `vo` lines, written for reading: figures instead of spoken numbers,
+  connexcy.com instead of "Connexcy dot com") and the VideoObject `duration` in each page's `<head>` (a placeholder
+  `PT1M` until the videos are rendered) must match that page's video.
 
 ## Forms (beta signups and guide requests)
 Forms send to the Connexcy app at `https://app.connexcy.com/api/leads` (`FORM_ENDPOINT` in `assets/main.js`).

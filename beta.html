@@ -24,8 +24,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@700&display=swap" rel="stylesheet">
   <script>try{if(sessionStorage.getItem("cx-intro")||document.referrer.indexOf(location.origin+"/")===0)document.documentElement.classList.add("intro-seen");else sessionStorage.setItem("cx-intro","1")}catch(e){document.documentElement.classList.add("intro-seen")}</script>
-  <link rel="stylesheet" href="assets/styles.css?v=3">
-  <noscript><style>.intro{display:none}.reveal{opacity:1;transform:none}</style></noscript>
+  <link rel="stylesheet" href="assets/styles.css?v=4">
+  <noscript><style>.intro{display:none}.reveal{opacity:1;transform:none}.nav-dd:hover .nav-dd-panel,.nav-dd:focus-within .nav-dd-panel{display:block}</style></noscript>
 </head>
 <body>
 <div class="intro" aria-hidden="true"><span class="intro-lockup"><svg viewBox="0 0 64 64" width="76" height="76"><path class="lm" fill="#1d4ed8" d="M14 25L19.929 25A5 5 0 0 1 23.464 26.464L34.536 37.536A5 5 0 0 1 36 41.071L36 55A5 5 0 0 1 31 60L14 60A5 5 0 0 1 9 55L9 30A5 5 0 0 1 14 25Z"/><path class="la" fill="#0891b2" d="M50 39L44.071 39A5 5 0 0 1 40.536 37.536L29.464 26.464A5 5 0 0 1 28 22.929L28 9A5 5 0 0 1 33 4L50 4A5 5 0 0 1 55 9L55 34A5 5 0 0 1 50 39Z"/></svg><span class="intro-word">Connexcy</span></span></div>
@@ -39,6 +39,21 @@
     </a>
     <ul class="nav-links">
       <li><a href="features.html">Features</a></li>
+      <li class="nav-dd">
+        <button type="button" class="nav-dd-btn" aria-expanded="false" aria-controls="nav-industries">Industries<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+        <span class="nav-dd-heading">Industries</span>
+        <div class="nav-dd-panel" id="nav-industries">
+          <ul class="nav-dd-list" aria-label="Industries">
+            <li><a href="industries/saas.html"><span class="ind-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg></span><span><strong>SaaS &amp; technology</strong><span class="d">Dozens of subscriptions, seat counts and usage commitments, each renewing on its own date.</span></span></a></li>
+            <li><a href="industries/ecommerce.html"><span class="ind-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg></span><span><strong>E-commerce &amp; retail</strong><span class="d">Apps that bill by the order, the contact and the month, and a warehouse contract that renews in peak season.</span></span></a></li>
+            <li><a href="industries/restaurants.html"><span class="ind-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 2v7a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6a2 2 0 0 0 2 2h3Zm0 0v7"/></svg></span><span><strong>Restaurants &amp; hospitality</strong><span class="d">Food distributors, linens, POS and reservations, across every location, with prices that change every week.</span></span></a></li>
+            <li><a href="industries/healthcare.html"><span class="ind-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg></span><span><strong>Healthcare practices</strong><span class="d">Records systems, patient messaging, supplies and medical waste, each with its own contract and business associate agreement.</span></span></a></li>
+            <li><a href="industries/financial-services.html"><span class="ind-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 22h18M6 18v-7M10 18v-7M14 18v-7M18 18v-7M12 2l9 5H3Z"/></svg></span><span><strong>Financial services</strong><span class="d">Market data, research and archiving contracts with long terms, yearly increases, and examiners who ask why you chose each vendor.</span></span></a></li>
+            <li><a href="industries/professional-services.html"><span class="ind-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2M2 13h20"/></svg></span><span><strong>Law, accounting &amp; agencies</strong><span class="d">Research subscriptions, practice software, licenses and leases, with multi-year terms and increases built in.</span></span></a></li>
+          </ul>
+          <a class="nav-dd-all" href="industries/index.html">All industries →</a>
+        </div>
+      </li>
       <li><a href="index.html#how">How it works</a></li>
       <li><a href="pricing.html">Pricing</a></li>
       <li><a href="https://app.connexcy.com/reviews">Vendor reviews</a></li>
@@ -171,6 +186,7 @@
         <h4>Product</h4>
         <ul>
           <li><a href="features.html">Features</a></li>
+          <li><a href="industries/index.html">Industries</a></li>
           <li><a href="pricing.html">Pricing</a></li>
           <li><a href="index.html#calculator">Savings calculator</a></li>
           <li><a href="index.html#guide">Free renewal guide</a></li>
@@ -201,6 +217,6 @@
   </div>
 </footer>
 
-<script src="assets/main.js?v=3"></script>
+<script src="assets/main.js?v=4"></script>
 </body>
 </html>

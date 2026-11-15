@@ -25,8 +25,9 @@ const CONTACT_EMAIL = "hello@connexcy.com";
     else document.addEventListener("visibilitychange", removeLater, { once: true });
   }
 
-  // Explainer video (home page): show the big "Watch" button over the poster; it starts the video and gets out of
-  // the way, leaving the native controls.
+  // Videos (the home page's explainer and each industry page's film): every .video-frame with a .video-play button
+  // shows that big "Watch" button over the poster; it starts the video and gets out of the way, leaving the native
+  // controls.
   document.querySelectorAll(".video-frame").forEach((frame) => {
     const video = frame.querySelector("video");
     const play = frame.querySelector(".video-play");
@@ -54,6 +55,75 @@ const CONTACT_EMAIL = "hello@connexcy.com";
       toggle.setAttribute("aria-expanded", String(open));
     });
   }
+
+  // Industries menu (header). On desktop the "Industries" button opens its panel: a click opens or closes it, and a
+  // mouse hovering over it opens it until the mouse leaves (a click while hovering keeps it open). Esc, a click
+  // outside it, or focus moving out of it closes it; the down arrow on the button opens it and moves into the list,
+  // and the up and down arrows move between its links. In the mobile menu (1120px wide and below) the CSS hides the
+  // button and always shows the list, so none of this applies there.
+  const desktop = window.matchMedia ? window.matchMedia("(min-width: 1121px)") : { matches: true };
+  document.querySelectorAll(".nav-dd").forEach((dd) => {
+    const btn = dd.querySelector(".nav-dd-btn");
+    const panel = dd.querySelector(".nav-dd-panel");
+    if (!btn || !panel) return;
+    let pinned = false; // opened by a click or a key, so the mouse leaving doesn't close it
+    let leaveTimer = 0;
+    const isOpen = () => dd.classList.contains("open");
+    const links = () => Array.from(panel.querySelectorAll("a"));
+    const setOpen = (open) => {
+      clearTimeout(leaveTimer);
+      dd.classList.toggle("open", open);
+      btn.setAttribute("aria-expanded", String(open));
+      if (!open) pinned = false;
+    };
+    btn.addEventListener("click", () => {
+      if (isOpen() && !pinned) { pinned = true; return; }
+      setOpen(!isOpen());
+      pinned = isOpen();
+    });
+    btn.addEventListener("keydown", (e) => {
+      if (e.key !== "ArrowDown") return;
+      e.preventDefault();
+      setOpen(true);
+      pinned = true;
+      const first = links()[0];
+      if (first) first.focus();
+    });
+    dd.addEventListener("pointerenter", (e) => {
+      if (e.pointerType !== "mouse" || !desktop.matches) return;
+      clearTimeout(leaveTimer);
+      if (!isOpen()) setOpen(true);
+    });
+    dd.addEventListener("pointerleave", (e) => {
+      if (e.pointerType !== "mouse" || pinned || !isOpen()) return;
+      leaveTimer = setTimeout(() => { if (!pinned) setOpen(false); }, 200);
+    });
+    panel.addEventListener("keydown", (e) => {
+      if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+      const l = links();
+      const i = l.indexOf(document.activeElement);
+      if (i < 0) return;
+      e.preventDefault();
+      l[(i + (e.key === "ArrowDown" ? 1 : l.length - 1)) % l.length].focus();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape" || !isOpen()) return;
+      const inside = dd.contains(document.activeElement);
+      setOpen(false);
+      if (inside && desktop.matches) btn.focus();
+    });
+    // A press inside the menu (Safari doesn't focus the link it presses) isn't focus leaving it.
+    let pressing = false;
+    dd.addEventListener("pointerdown", () => { pressing = true; });
+    document.addEventListener("pointerup", () => setTimeout(() => { pressing = false; }, 0));
+    document.addEventListener("pointercancel", () => { pressing = false; });
+    dd.addEventListener("focusout", (e) => {
+      if (isOpen() && !pressing && !dd.contains(e.relatedTarget)) setOpen(false);
+    });
+    document.addEventListener("pointerdown", (e) => {
+      if (isOpen() && !dd.contains(e.target)) setOpen(false);
+    });
+  });
 
   // Footer year
   document.querySelectorAll("[data-year]").forEach((el) => (el.textContent = new Date().getFullYear()));
