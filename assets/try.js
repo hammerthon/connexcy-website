@@ -5,6 +5,8 @@
  * vendor, an approval chain (nudges, or acting as the approver) and making the approved quote the active contract.
  *
  * Everything runs here, in the browser. No network calls, no cookies, no storage: reloading or "Start over" clears it.
+ * "Use your own numbers" swaps the example prices for the visitor's; every figure, and which approvers the amount
+ * needs, is worked out from them (see nums()). They stay in memory only, like everything else, and never go in a URL.
  * It only shows what the Connexcy app does (see /Users/hammer/connexy/connexy-app/README.md). Every company, person,
  * vendor and figure is made up, and the vendor names are invented so no real vendor's prices are implied.
  */
@@ -60,8 +62,28 @@
     { id: "ashgrove", vendor: "Ashgrove Properties", what: "Office lease", owner: "robin", annual: 96000, renews: D(2028, 9, 1), notice: 180 },
   ];
   const deadlineOf = (c) => addDays(c.renews, -c.notice);
-  const TODAY_PRICE = 48000;
-  const QUOTE_PRICE = 53760; // +12%
+
+  // The prices. The example: $48,000 a year today, a +12% renewal quote ($53,760), Mossgate at 7.5% below today for
+  // 24 months ($44,400) or 2.5% below for 12 months ($46,800). "Use your own numbers" replaces them; whatever the
+  // visitor types stays in this page's memory only (never stored, never sent, never put in the URL).
+  const EXAMPLE = { today: 48000, mode: "pct", pct: 12, quote: 53760, alt: null };
+  const MAX_AMOUNT = 10000000;
+  let NUM = Object.assign({ custom: false }, EXAMPLE);
+  function nums() {
+    const today = NUM.today;
+    const quote = NUM.mode === "pct" ? Math.round(today * (1 + NUM.pct / 100)) : NUM.quote;
+    const altGiven = NUM.alt != null;
+    const alt24 = altGiven ? NUM.alt : Math.round(today * 0.925);
+    const alt12 = altGiven ? NUM.alt : Math.round(today * 0.975);
+    return {
+      custom: NUM.custom, today, quote, up: quote - today, inc: (quote - today) / today * 100,
+      altGiven, alt12, alt24,
+      revised: today + Math.round((quote - today) * 2 / 3), // the revised quote after "Request changes": a third off the increase
+      matchable: alt24 < quote, // Tallowbird is only asked to match a cheaper offer
+    };
+  }
+  const incText = (P) => (P.up > 0 ? "+" + pct(P.inc) : "no increase");
+  const upText = (P) => (P.up > 0 ? "up " + money(P.up) + " (+" + pct(P.inc) + ") from " + money(P.today) : "the same as the " + money(P.today) + " you pay today");
   const QUOTE_DAY = dayNum(D(2026, 11, 4)); // when Tallowbird's renewal quote arrives
   const MAX_DAY = dayNum(D(2026, 12, 31)); // Tallowbird's notice deadline: the demo stops there
   const NEW_START = D(2027, 3, 1);
@@ -111,13 +133,14 @@
   // Each option the visitor can send for approval. rev = the vendor sent a revised quote after "Request changes".
   function spec(id) {
     const rev = S.rev[id] || 0;
+    const P = nums();
     if (id === "renewal") {
-      const price = rev ? 51840 : QUOTE_PRICE;
+      const price = rev ? P.revised : P.quote;
       return {
         id, vendor: "Tallowbird Helpdesk", vkey: "tallowbird", name: rev ? "Tallowbird renewal (revised)" : "Tallowbird renewal",
         price, term: 12, notice: rev ? 60 : 90, autoRenew: true,
         vals: {
-          price: { n: price, v: money(price) + "/yr", t: rev ? "Revised renewal fees: $51,840 for the next twelve (12) month term, invoiced annually in advance." : "Renewal fees for the next twelve (12) month term: $53,760, invoiced annually in advance." },
+          price: { n: price, v: money(price) + "/yr", t: rev ? "Revised renewal fees: " + money(price) + " for the next twelve (12) month term, invoiced annually in advance." : "Renewal fees for the next twelve (12) month term: " + money(price) + ", invoiced annually in advance." },
           term: { n: 12, v: "12 months", t: "Renewal Term: twelve (12) months from March 1, 2027." },
           autoRenew: { n: 1, v: "Yes, 12 months at a time", t: "The Agreement continues to renew automatically for successive twelve (12) month periods." },
           notice: rev ? { n: 60, v: "60 days", t: "Notice of non-renewal must be given at least sixty (60) days before the end of the then-current term." }
@@ -131,9 +154,9 @@
     if (id === "match") {
       return {
         id, vendor: "Tallowbird Helpdesk", vkey: "tallowbird", name: rev ? "Tallowbird, price matched (revised)" : "Tallowbird, price matched",
-        price: 44400, term: 24, notice: rev ? 60 : 90, autoRenew: true,
+        price: P.alt24, term: 24, notice: rev ? 60 : 90, autoRenew: true,
         vals: {
-          price: { n: 44400, v: "$44,400/yr", t: "Subscription fees: $44,400 per year for a twenty-four (24) month term, invoiced annually in advance." },
+          price: { n: P.alt24, v: money(P.alt24) + "/yr", t: "Subscription fees: " + money(P.alt24) + " per year for a twenty-four (24) month term, invoiced annually in advance." },
           term: { n: 24, v: "24 months", t: "Renewal Term: twenty-four (24) months from March 1, 2027." },
           autoRenew: { n: 1, v: "Yes, 12 months at a time", t: "After that, the Agreement renews automatically for successive twelve (12) month periods." },
           notice: rev ? { n: 60, v: "60 days", t: "Notice of non-renewal must be given at least sixty (60) days before the end of the then-current term." }
@@ -146,12 +169,12 @@
     }
     // Mossgate Support, the alternative vendor: 12 or 24 months.
     const long = S.moss === 24;
-    const price = long ? 44400 : 46800;
+    const price = long ? P.alt24 : P.alt12;
     return {
       id: "moss", vendor: "Mossgate Support", vkey: "mossgate", name: rev ? "Mossgate Support (revised)" : "Mossgate Support",
       price, term: S.moss, notice: 30, autoRenew: false,
       vals: {
-        price: { n: price, v: money(price) + "/yr", t: long ? "Fees: $44,400 per year for a twenty-four (24) month commitment, invoiced annually in advance." : "Fees: $46,800 for a twelve (12) month term, invoiced in advance." },
+        price: { n: price, v: money(price) + "/yr", t: long ? "Fees: " + money(price) + " per year for a twenty-four (24) month commitment, invoiced annually in advance." : "Fees: " + money(price) + " for a twelve (12) month term, invoiced in advance." },
         term: { n: S.moss, v: S.moss + " months", t: "Subscription term: " + (long ? "twenty-four (24)" : "twelve (12)") + " months starting March 1, 2027." },
         autoRenew: { n: 0, v: "No, only if both sides sign", t: "This Order Form does not renew automatically; any renewal requires a new signed Order Form." },
         notice: { n: 30, v: "30 days", t: "Either party may end the Agreement at the end of a term with thirty (30) days’ written notice." },
@@ -165,7 +188,7 @@
       },
     };
   }
-  const options = () => ["renewal", "moss"].concat(S.match === "ready" ? ["match"] : []);
+  const options = () => ["renewal", "moss"].concat(S.match === "ready" && nums().matchable ? ["match"] : []);
 
   function change(k, val) {
     const a = CUR[k].n, b = val.n;
@@ -181,7 +204,10 @@
     if (k === "term") return b > a ? "Longer commitment" : "Shorter commitment";
     return "";
   }
-  const savings = (s) => ({ year: QUOTE_PRICE - s.price, term: (QUOTE_PRICE - s.price) * s.term / 12, vsToday: TODAY_PRICE - s.price });
+  // Positive: cheaper than the renewal quote (or than today). Negative: it costs more, and the views say so in words.
+  const savings = (s) => { const P = nums(); return { year: P.quote - s.price, term: (P.quote - s.price) * s.term / 12, vsToday: P.today - s.price }; };
+  // "saves $9,360/yr vs. the quote", "costs $1,200/yr more than the quote" or "same price as the quote".
+  const vsQuote = (v, unit) => (v > 0 ? "saves " + money(v) + unit + " vs. the quote" : v < 0 ? "costs " + money(-v) + unit + " more than the quote" : "same price as the quote");
 
   const NUDGE_REPLY = {
     priya: "Thanks for the nudge! Approved. My team can work with this.",
@@ -193,11 +219,16 @@
     match: "Fine on price, but ask them to keep the 60-day notice.",
     moss: "Ask Mossgate to delete our data within 30 days, like we have today.",
   };
-  const REVISED = {
-    renewal: "Tallowbird sent a revised quote: $51,840/yr (+8% instead of +12%), with the 60-day notice period back.",
-    match: "Tallowbird kept the matched price and put the 60-day notice period back.",
-    moss: "Mossgate sent a revised order form: your data deleted within 30 days, certified.",
-  };
+  function revisedText(id) {
+    const P = nums();
+    if (id === "renewal") {
+      return P.up > 0
+        ? "Tallowbird sent a revised quote: " + money(P.revised) + "/yr (+" + pct((P.revised - P.today) / P.today * 100) + " instead of +" + pct(P.inc) + "), with the 60-day notice period back."
+        : "Tallowbird sent a revised quote: the same " + money(P.revised) + "/yr, with the 60-day notice period back.";
+    }
+    if (id === "match") return "Tallowbird kept the matched price and put the 60-day notice period back.";
+    return "Mossgate sent a revised order form: your data deleted within 30 days, certified.";
+  }
 
   // ---------------------------------------------------------------------------------------------------------------
   // State
@@ -210,7 +241,7 @@
       schedule: [90, 60, 30], newSchedule: [90, 60, 30],
       fired: {}, feed: [], freshIds: [],
       quote: false, hl: null,
-      moss: 24, match: "none", rev: { renewal: 0, match: 0, moss: 0 }, revWaiting: false,
+      moss: 24, match: "none", matchRound: 0, rev: { renewal: 0, match: 0, moss: 0 }, revWaiting: false,
       pick: "moss", sub: null, round: 0,
       nudgeOpen: false, nudgeNote: "", waiting: null,
       asApprover: false, apprNote: "",
@@ -223,6 +254,7 @@
     return fmtShort(today()) + ", " + ((h + 11) % 12 + 1) + ":" + String(m).padStart(2, "0") + (h < 12 ? " AM" : " PM");
   }
   const tick = (m) => { S.min = Math.min(S.min + m, 8 * 60 + 50); };
+  // text can be a function, for lines whose figures follow the numbers in use (the renewal quote).
   function log(text, kind) { S.log.unshift({ t: stamp(), text, kind: kind || "" }); }
   function later(ms, fn) {
     const id = setTimeout(() => { timers = timers.filter((x) => x !== id); fn(); }, ms);
@@ -234,6 +266,75 @@
   }
   const person = (p) => PEOPLE[p];
   const who = (p) => person(p).name + ", " + person(p).title;
+
+  // ---------------------------------------------------------------------------------------------------------------
+  // "Use your own numbers": the form's draft (what's typed, kept across re-renders) and its inline errors.
+  const freshNumsUI = () => ({ open: false, draft: null, errs: {} });
+  let numsUI = freshNumsUI();
+  const plain = (n) => Math.round(n).toLocaleString("en-US");
+  function draftFrom() {
+    const P = nums();
+    return { today: plain(P.today), mode: NUM.mode, pct: String(Number(P.inc.toFixed(1))), quote: plain(P.quote), alt: P.altGiven ? plain(NUM.alt) : "" };
+  }
+  // Puts the numbers in use into the current contract's price term and the dashboard row.
+  function syncNums() {
+    const P = nums();
+    CUR.price = { n: P.today, v: money(P.today) + "/yr", sec: "4.1", t: "Customer will pay annual subscription fees of " + money(P.today) + ", invoiced once a year in advance." };
+    if (S && !S.live) S.contracts[0].annual = P.today;
+  }
+  // "$48,000", "48000", "48k" and "1.2m" all work. Anything else is NaN, which the checks below turn into a message.
+  function parseAmount(raw) {
+    const m = /^(\d+(?:\.\d+)?|\.\d+)([km]?)$/.exec(String(raw).trim().toLowerCase().replace(/[\s,$]/g, ""));
+    return m ? Math.round(Number(m[1]) * (m[2] === "k" ? 1e3 : m[2] === "m" ? 1e6 : 1)) : NaN;
+  }
+  function amountCheck(raw, what) {
+    if (!String(raw).trim()) return { err: "Enter " + what + "." };
+    const n = parseAmount(raw);
+    if (!isFinite(n)) return { err: "Enter a dollar amount, like 48,000." };
+    if (n < 100) return { err: "Enter at least $100 a year." };
+    if (n > MAX_AMOUNT) return { err: "Keep it to $10,000,000 a year or less." };
+    return { n };
+  }
+  function checkNums(d) {
+    const errs = {}, val = { custom: true, mode: d.mode, pct: null, quote: null, alt: null };
+    const t = amountCheck(d.today, "what you pay today, per year");
+    if (t.err) errs.today = t.err; else val.today = t.n;
+    if (d.mode === "pct") {
+      const raw = String(d.pct).trim().replace(/[\s%+]/g, "");
+      if (!raw) errs.pct = "Enter the increase, like 12.";
+      else if (/^[-−–]/.test(raw)) errs.pct = "Enter 0 or more: this demo is about renewal increases.";
+      else if (!/^(\d+(\.\d+)?|\.\d+)$/.test(raw)) errs.pct = "Enter a number from 0 to 100, like 12 or 7.5.";
+      else if (Number(raw) > 100) errs.pct = "Keep the increase to 100% or less.";
+      else if (val.today && Math.round(val.today * (1 + Number(raw) / 100)) > MAX_AMOUNT) errs.pct = "That puts the quote over $10,000,000 a year. Try a smaller increase.";
+      else val.pct = Number(raw);
+    } else {
+      const q = amountCheck(d.quote, "the quoted price per year");
+      if (q.err) errs.quote = q.err;
+      else if (val.today && q.n < val.today) errs.quote = "That’s below the " + money(val.today) + " you pay today. This demo is about renewal increases: enter " + money(val.today) + " or more.";
+      else if (val.today && q.n > val.today * 2) errs.quote = "That’s more than double today’s price. Keep it to " + money(val.today * 2) + " or less.";
+      else val.quote = q.n;
+    }
+    if (String(d.alt).trim()) { const a = amountCheck(d.alt, "the other vendor’s price"); if (a.err) errs.alt = a.err; else val.alt = a.n; }
+    return { errs, val };
+  }
+  // After the numbers change: everything derived is worked out again on the next render; a price match is withdrawn.
+  function numsChanged() {
+    syncNums();
+    tick(2);
+    if (S.match !== "none") {
+      S.match = "none"; S.matchRound++;
+      if (S.pick === "match") S.pick = "moss";
+      log("The numbers changed, so Tallowbird’s price match was withdrawn. Ask again to get one at the new price.");
+    }
+    const P = nums();
+    log((P.custom ? "You switched to your own numbers: " : "You went back to the example numbers: ") + money(P.today) + "/yr today, renewal quote " + money(P.quote) + "/yr (" + incText(P) + "), Mossgate " + money(P.alt24) + "/yr.");
+  }
+  function numsSummary() {
+    const P = nums();
+    const r = RULE[tierFor(P.quote)];
+    return (P.custom ? "Using your numbers. " : "Using the example numbers. ") + "Today " + money(P.today) + " a year; renewal quote " + money(P.quote) + " (" + incText(P) + "); Mossgate " + money(P.alt24) + " a year. " +
+      "Approving the renewal needs " + r.roles.replace(/ → /g, ", then ") + "." + (P.alt24 >= P.quote ? " Mossgate costs more than the renewal quote." : "");
+  }
 
   // Alerts: each contract's owner is emailed N days before its notice deadline, and on the deadline itself.
   const scheduleOf = (c) => (c.isNew ? c.schedule : c.id === "tallowbird" ? S.schedule : [90, 60, 30]);
@@ -254,18 +355,22 @@
   function fire(e, quiet) {
     if (e.id === "quote") {
       S.quote = true;
-      S.feed.unshift({ id: e.id, ico: "📄", day: e.day, title: "Renewal quote from Tallowbird Helpdesk", body: "$53,760/yr: up $5,760 (+12%) from $48,000.", to: "robin" });
-      if (!quiet) log("Tallowbird sent its renewal quote: $53,760/yr, up 12%. You uploaded the PDF and its terms filled in.", "alert");
+      // The quote's figures are worked out when shown, so they follow "Use your own numbers".
+      S.feed.unshift({ id: e.id, ico: "📄", day: e.day, title: "Renewal quote from Tallowbird Helpdesk", body: () => { const P = nums(); return money(P.quote) + "/yr: " + upText(P) + "."; }, to: "robin" });
+      if (!quiet) log(() => { const P = nums(); return "Tallowbird sent its renewal quote: " + money(P.quote) + "/yr, " + (P.up > 0 ? "up " + pct(P.inc) : "no increase") + ". You uploaded the PDF and its terms filled in."; }, "alert");
       return;
     }
     const t = alertText(e.c, e.d);
     S.feed.unshift({ id: e.id, ico: "📧", day: e.day, title: t.title, body: t.body, to: e.c.owner });
     if (!quiet) log("Alert: " + t.title + ". Emailed " + who(e.c.owner) + ".", "alert");
   }
-  function reset() {
+  // keepNums: start the renewal again with the visitor's own numbers ("Try the other path"). Otherwise back to the example.
+  function reset(keepNums) {
     timers.forEach(clearTimeout);
     timers = [];
+    if (!keepNums) { NUM = Object.assign({ custom: false }, EXAMPLE); numsUI = freshNumsUI(); }
     S = fresh();
+    syncNums();
     // Alerts already sent before the demo's first day (shown in the feed, not the log).
     events().forEach((e) => { if (e.day < 0 && e.day > -30) { S.fired[e.id] = true; fire(e, true); } });
     log("You signed in to Connexcy as Robin Okafor, Operations Manager.");
@@ -287,7 +392,7 @@
     S.freshIds = fired.map((e) => e.id);
     let msg = "Today is now " + fmtLong(today()) + ". ";
     if (!fired.length) msg += "No new alerts.";
-    else msg += fired.map((e) => (e.id === "quote" ? "Tallowbird’s renewal quote arrived: $53,760 a year, up 12%." : alertText(e.c, e.d).title + ", emailed to " + who(e.c.owner) + ".")).join(" ");
+    else msg += fired.map((e) => (e.id === "quote" ? "Tallowbird’s renewal quote arrived: " + money(nums().quote) + " a year, " + (nums().up > 0 ? "up " + pct(nums().inc) : "no increase") + "." : alertText(e.c, e.d).title + ", emailed to " + who(e.c.owner) + ".")).join(" ");
     announce(msg);
   }
   const nextEventDay = () => { const e = events().find((x) => x.day > S.day && !S.fired[x.id] && x.day <= MAX_DAY); return e ? e.day : null; };
@@ -368,6 +473,47 @@
   const btn = (act, label, cls, extra) => '<button type="button" class="btn ' + (cls || "btn-primary") + ' btn-sm" data-act="' + act + '"' + (extra || "") + ">" + label + "</button>";
   const heading = (text) => '<h2 tabindex="-1" id="try-h">' + text + "</h2>";
 
+  // The "Use your own numbers" panel (on Contracts and Compare): the numbers in use, which approvals the renewal
+  // needs at that amount, and the form. Fixed once something is sent for approval, so the chain matches its amount.
+  function numInput(id, key, label, pre, post, hint) {
+    const err = numsUI.errs[key];
+    const desc = [hint ? id + "-hint" : "", err ? id + "-err" : ""].filter(Boolean).join(" ");
+    return '<label for="' + id + '">' + label + '</label><div class="try-input' + (err ? " is-bad" : "") + '">' + (pre ? '<span class="aff" aria-hidden="true">' + pre + "</span>" : "") +
+      '<input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" maxlength="20" id="' + id + '" data-fk="' + id + '" data-num="' + key + '" value="' + esc(numsUI.draft[key]) + '"' +
+      (desc ? ' aria-describedby="' + desc + '"' : "") + (err ? ' aria-invalid="true"' : "") + ">" + (post ? '<span class="aff" aria-hidden="true">' + post + "</span>" : "") + "</div>" +
+      (err ? '<p class="try-err" id="' + id + '-err">' + esc(err) + "</p>" : "") + (hint ? '<small id="' + id + '-hint">' + hint + "</small>" : "");
+  }
+  function numsHtml() {
+    const P = nums();
+    const locked = !!S.sub || !!S.live;
+    const r = RULE[tierFor(P.quote)];
+    let h = '<section class="try-nums' + (P.custom ? " is-custom" : "") + '" aria-labelledby="try-nums-h"><div class="try-nums-bar"><div class="try-nums-sum">' +
+      '<h3 id="try-nums-h">' + (P.custom ? "Your numbers" : "Example numbers") + "</h3>" +
+      '<p class="try-nums-figs"><span>Today <b>' + money(P.today) + "/yr</b></span><span>Renewal quote <b>" + money(P.quote) + "/yr</b> (" + incText(P) + ")</span>" +
+      "<span>Mossgate <b>" + money(P.alt24) + "/yr</b>" + (P.altGiven ? "" : " for 24 months") + "</span></p>" +
+      '<p class="try-nums-appr">Renewing at ' + money(P.quote) + " needs: <b>" + r.roles + "</b> <span class=\"muted\">(" + r.label + ")</span></p></div>";
+    if (locked) {
+      h += '<div class="try-nums-btns"><p class="muted">Fixed once a quote is sent for approval.</p>' + btn("nums-restart", "Start over with new numbers", "btn-ghost", ' data-fk="nums-restart"') + "</div></div>";
+      return h + "</section>";
+    }
+    h += '<div class="try-nums-btns">' + btn("nums-toggle", numsUI.open ? "Close" : P.custom ? "Change your numbers" : "Use your own numbers", numsUI.open ? "btn-ghost" : "btn-primary", ' data-fk="nums-toggle" aria-expanded="' + numsUI.open + '" aria-controls="try-nums-form"') +
+      (P.custom ? btn("nums-example", "Use example numbers", "btn-ghost", ' data-fk="nums-example"') : "") + "</div></div>";
+    if (numsUI.open) {
+      const d = numsUI.draft;
+      h += '<form class="try-nums-form" id="try-nums-form" novalidate><p class="try-nums-note">Try it with one of your own contracts. Yearly amounts in dollars. What you type stays in this page: it isn’t saved or sent anywhere.</p><div class="try-nums-grid">' +
+        '<div class="try-field">' + numInput("num-today", "today", "What you pay today, per year", "$", "", "") + "</div>" +
+        '<fieldset class="try-field"><legend>The renewal quote</legend><div class="try-seg try-qmode">' +
+        '<span class="opt"><input type="radio" name="try-qmode" id="qmode-pct" value="pct" data-fk="qmode-pct"' + (d.mode === "pct" ? " checked" : "") + '><label for="qmode-pct">% increase</label></span>' +
+        '<span class="opt"><input type="radio" name="try-qmode" id="qmode-price" value="price" data-fk="qmode-price"' + (d.mode === "price" ? " checked" : "") + '><label for="qmode-price">Quoted price</label></span></div>' +
+        (d.mode === "pct" ? numInput("num-pct", "pct", "Increase at renewal", "", "%", "0 to 100.") : numInput("num-quote", "quote", "Quoted price per year", "$", "", "")) + "</fieldset>" +
+        '<div class="try-field">' + numInput("num-alt", "alt", "Another vendor’s price per year <span class=\"muted\">(optional)</span>", "$", "",
+          "Shown as Mossgate. Left blank: 7.5% below today for 24 months, as in the example. It can cost more than the renewal; the demo will say so.") + "</div>" +
+        '</div><div class="try-actions"><button type="submit" class="btn btn-primary btn-sm" data-fk="nums-apply">Use these numbers</button>' +
+        btn("nums-example", "Use example numbers", "btn-ghost", ' data-fk="nums-example-2"') + "</div></form>";
+    }
+    return h + "</section>";
+  }
+
   function badgeFor(c) {
     const n = dayNum(deadlineOf(c)) - S.day;
     if (n < 0) return ["badge-red", "Notice deadline passed"];
@@ -380,12 +526,12 @@
     if (S.live) return "";
     if (S.sub && S.sub.status === "approved") return '<span class="badge badge-green">Approved</span>';
     if (S.sub && S.sub.status === "pending") return '<span class="badge badge-blue">In approval</span>';
-    if (S.quote) return '<span class="badge badge-amber">Renewal quote: +12%</span>';
+    if (S.quote) return '<span class="badge badge-amber">Renewal quote: ' + incText(nums()) + "</span>";
     return "";
   }
 
   function feedItem(f, fresh) {
-    return '<li class="' + (fresh ? "is-fresh" : "") + '"><span class="ico" aria-hidden="true">' + f.ico + "</span><span><b>" + esc(f.title) + "</b>" + esc(f.body) +
+    return '<li class="' + (fresh ? "is-fresh" : "") + '"><span class="ico" aria-hidden="true">' + f.ico + "</span><span><b>" + esc(f.title) + "</b>" + esc(typeof f.body === "function" ? f.body() : f.body) +
       '<span class="to">To ' + who(f.to) + "</span></span>" + '<span class="when">' + fmtShort(addDays(START, f.day)) + "</span></li>";
   }
   function panelContracts() {
@@ -397,6 +543,7 @@
     const total = S.contracts.reduce((a, c) => a + c.annual, 0);
     let h = '<div class="try-panel">' + heading("Contracts") +
       '<p class="try-sub">Wrenfield Goods Co.’s vendor contracts. Connexcy tracks each one’s notice deadline, not just its end date, and emails the contract’s owner before it.</p>';
+    h += numsHtml();
     h += '<div class="try-time"><div><span class="k">Today (simulated)</span><span class="today">' + fmtLong(today()) + "</span></div>" +
       '<div class="btns" role="group" aria-label="Move time forward">' +
       '<button type="button" class="btn-time" data-act="skip" data-n="1" data-fk="skip1"' + (atEnd ? " disabled" : "") + ">Skip ahead a day</button>" +
@@ -413,7 +560,7 @@
     else if (!S.quote) h += '<p class="try-hint">👉 Keep going: Tallowbird’s renewal quote arrives on Nov 4. “Jump to the next alert” gets there fastest.</p>';
     if (!S.live && S.quote && tbLeft <= 30) {
       h += '<p class="try-warn" role="note">⚠️ ' + (tbLeft === 0 ? "Today is Tallowbird’s notice deadline." : "Tallowbird’s notice deadline is in " + days(tbLeft) + ".") +
-        " If nobody decides, it renews by itself on Mar 1, 2027 at the quoted $53,760 a year." + (tbLeft === 0 ? " (The demo’s clock stops here.)" : "") + "</p>";
+        " If nobody decides, it renews by itself on Mar 1, 2027 at the quoted " + money(nums().quote) + " a year." + (tbLeft === 0 ? " (The demo’s clock stops here.)" : "") + "</p>";
     }
     h += '<div class="try-kpis"><div class="kpi"><div class="k">Active contracts</div><div class="v">' + S.contracts.length + "</div></div>" +
       '<div class="kpi"><div class="k">Yearly value</div><div class="v">' + money(total) + "</div></div>" +
@@ -497,9 +644,10 @@
         (S.sub.status === "approved" ? "Fully approved." : "Waiting on " + who(pending().p) + ".") + "</p>" +
         '<div class="try-actions">' + btn("go", S.sub.status === "approved" ? "Go live →" : "See the approval chain →", "btn-primary", ' data-n="' + (S.sub.status === "approved" ? 5 : 4) + '" data-fk="q-see"') + "</div></div>";
     } else {
-      h += '<div class="try-quote"><h3>Renewal quote from Tallowbird <span class="badge badge-red">+12%</span></h3>' +
+      const P = nums();
+      h += '<div class="try-quote"><h3>Renewal quote from Tallowbird <span class="badge ' + (P.up > 0 ? "badge-red" : "badge-gray") + '">' + incText(P) + "</span></h3>" +
         "<p style=\"margin:0\">Arrived " + fmt(addDays(START, QUOTE_DAY)) + ". You uploaded the PDF and its terms filled in. What changed:</p><ul>" +
-        "<li>Price: <strong>$53,760/yr</strong>, up $5,760 (+12%) from $48,000</li>" +
+        "<li>Price: <strong>" + money(P.quote) + "/yr</strong>, " + upText(P) + "</li>" +
         "<li>Notice period: 60 → <strong>90 days</strong> (you’d have to decide a month earlier next time)</li>" +
         "<li>Uptime SLA: 99.9% → <strong>99.5%</strong></li></ul>" +
         '<div class="try-actions">' + btn("go", "Compare with another vendor", "btn-primary", ' data-n="3" data-fk="q-cmp"') + btn("send", "Send renewal for approval", "btn-dark", ' data-id="renewal" data-fk="q-send"') + "</div></div>";
@@ -508,12 +656,16 @@
   }
 
   function savingsHtml(s, labels) {
-    const v = savings(s);
+    const v = savings(s), P = nums();
     const cell = (k, val, small, neg) => '<div><div class="k">' + k + '</div><div class="v' + (neg ? " neg" : "") + '">' + val + "</div><small>" + small + "</small></div>";
+    // When the option costs more than the quote, say "Extra … $X more" rather than showing negative savings.
+    const more = v.year < 0;
     return '<div class="try-savings">' +
-      cell(labels ? "Saved this year" : "Per year vs. the renewal quote", money(v.year), v.year ? "vs. the $53,760 renewal quote" : labels ? "Renewed at the quoted price" : "This is the renewal quote") +
-      cell((labels ? "Saved over the " : "Over the ") + s.term + "-month term", money(v.term), "vs. renewing as quoted") +
-      cell(labels ? "Compared with last year" : "Per year vs. today’s price", v.vsToday >= 0 ? money(v.vsToday) + " less" : money(-v.vsToday) + " more", (labels ? "last year: " : "today: ") + "$48,000/yr", v.vsToday < 0) +
+      cell((more ? "Extra " : "Saved ") + (labels ? "this year" : "per year"), more ? money(-v.year) + " more" : money(v.year),
+        v.year ? (more ? "than the " : "vs. the ") + money(P.quote) + " renewal quote" : labels ? "Renewed at the quoted price" : "This is the renewal quote", more) +
+      cell((more ? "Extra" : "Saved") + " over the " + s.term + "-month term", more ? money(-v.term) + " more" : money(v.term), more ? "than renewing as quoted" : "vs. renewing as quoted", more) +
+      cell(labels ? "Compared with last year" : "Per year vs. today’s price", v.vsToday > 0 ? money(v.vsToday) + " less" : v.vsToday < 0 ? money(-v.vsToday) + " more" : "Same",
+        (labels ? "last year: " : "today: ") + money(P.today) + "/yr", v.vsToday < 0) +
       "</div>";
   }
 
@@ -523,22 +675,30 @@
     const sel = spec(S.pick);
     let h = '<div class="try-panel">' + heading("Compare: renew, or switch?") +
       '<p class="try-sub">Mossgate Support quoted the same help desk service. Each option is compared with your current Tallowbird contract, term by term. Pick the one to send for approval.</p>';
+    h += numsHtml();
+    const P = nums();
     h += '<fieldset class="try-picks"><legend>Option to send for approval</legend>';
     ids.forEach((id) => {
       const s = spec(id);
       h += '<div class="try-pick"><input type="radio" name="try-pick" id="pick-' + id + '" value="' + id + '" data-fk="pick-' + id + '"' + (S.pick === id ? " checked" : "") + ">" +
         '<label for="pick-' + id + '"><b>' + esc(s.name) + '</b><span class="p">' + money(s.price) + "/yr</span><small>" + s.term + " months · " +
-        (id === "renewal" && !S.rev.renewal ? "as quoted, +12%" : savings(s).year ? "saves " + money(savings(s).year) + "/yr vs. the quote" : "") + "</small></label></div>";
+        (id === "renewal" && !S.rev.renewal ? "as quoted, " + incText(P) : vsQuote(savings(s).year, "/yr")) + "</small></label></div>";
     });
     h += "</fieldset>";
     h += '<div class="try-row"><fieldset class="try-seg"><legend>Mossgate term:</legend>' +
-      '<span class="opt"><input type="radio" name="try-moss" id="moss-12" value="12" data-fk="moss-12"' + (S.moss === 12 ? " checked" : "") + '><label for="moss-12">12 months · $46,800/yr</label></span>' +
-      '<span class="opt"><input type="radio" name="try-moss" id="moss-24" value="24" data-fk="moss-24"' + (S.moss === 24 ? " checked" : "") + '><label for="moss-24">24 months · $44,400/yr</label></span></fieldset>';
-    if (S.match === "none") h += btn("match", "Ask Tallowbird to match", "btn-ghost", ' data-fk="match"');
+      '<span class="opt"><input type="radio" name="try-moss" id="moss-12" value="12" data-fk="moss-12"' + (S.moss === 12 ? " checked" : "") + '><label for="moss-12">12 months · ' + money(P.alt12) + "/yr</label></span>" +
+      '<span class="opt"><input type="radio" name="try-moss" id="moss-24" value="24" data-fk="moss-24"' + (S.moss === 24 ? " checked" : "") + '><label for="moss-24">24 months · ' + money(P.alt24) + "/yr</label></span></fieldset>";
+    if (!P.matchable) h += '<span class="muted" style="font-size:.84rem">Nothing to ask Tallowbird to match: Mossgate’s 24-month price isn’t below its quote.</span>';
+    else if (S.match === "none") h += btn("match", "Ask Tallowbird to match", "btn-ghost", ' data-fk="match"');
     else if (S.match === "asked") h += '<span class="try-waiting" role="status">Waiting for Tallowbird’s reply <span class="try-dots" aria-hidden="true"><i></i><i></i><i></i></span></span>';
-    else h += '<span class="try-checked">✓ Tallowbird matched: $44,400/yr for 24 months</span>';
+    else h += '<span class="try-checked">✓ Tallowbird matched: ' + money(P.alt24) + "/yr for 24 months</span>";
     h += "</div>";
-    h += '<h3 style="margin-top:18px">Savings with ' + esc(sel.name) + (sel.id === "moss" ? " (" + sel.term + " months)" : "") + "</h3>" + savingsHtml(sel);
+    const selMore = savings(sel).year < 0;
+    h += '<h3 style="margin-top:18px">' + (selMore ? "Cost" : "Savings") + " with " + esc(sel.name) + (sel.id === "moss" ? " (" + sel.term + " months)" : "") + "</h3>" + savingsHtml(sel);
+    if (selMore) {
+      h += '<p class="try-warn" role="note" style="margin:0 0 12px">' + esc(sel.name) + " costs " + money(-savings(sel).year) + " a year more than Tallowbird’s " + money(P.quote) + " renewal quote. " +
+        "Switching doesn’t always save money. It can still be worth it for better terms, which the table below shows; it’s your call, and your approvers’.</p>";
+    }
     let better = 0, worse = 0, changed = 0;
     ROWS.forEach((r) => { const c = change(r.k, sel.vals[r.k]); if (c === "better") better++; else if (c === "worse") worse++; else if (c === "changed") changed++; });
     h += '<p class="try-verdict"><span>' + esc(sel.name) + ": <strong>" + better + " better</strong>, <strong>" + worse + " worse</strong>" + (changed ? ", " + changed + " changed" : "") + " compared with your current contract.</span></p>";
@@ -648,7 +808,7 @@
       else h += '<span class="muted" style="font-size:.86rem">' + vendor + " says this is their final offer.</span>";
       h += btn("go", "Back to compare", "btn-ghost", ' data-n="3" data-fk="a-cmp"') + "</div>";
     } else if (sub.status === "rejected") {
-      h += '<div class="try-warn" style="margin-top:14px">Rejected. If nothing is approved by Dec 31, 2026, Tallowbird renews by itself at $53,760 a year.</div>' +
+      h += '<div class="try-warn" style="margin-top:14px">Rejected. If nothing is approved by Dec 31, 2026, Tallowbird renews by itself at ' + money(nums().quote) + " a year.</div>" +
         '<div class="try-actions">' + btn("go", "Back to compare and pick another option", "btn-primary", ' data-n="3" data-fk="a-cmp"') + "</div>";
     }
     h += "</div>";
@@ -702,14 +862,37 @@
       "</ul>";
     if (L.switched) h += '<p class="try-hint" style="margin:14px 0 0">📌 Still to do: tell Tallowbird in writing by Dec 31, 2026 that you won’t renew (section 2.3 of the old contract).</p>';
     h += "</div></div>";
-    h += '<div class="try-actions">' + btn("go", "See the updated dashboard", "btn-ghost", ' data-n="1" data-fk="l-dash"') + btn("reset", "Start over", "btn-ghost", ' data-fk="l-reset"') + "</div>";
-    h += '<div class="try-end"><p>That’s one renewal, start to finish. Want Connexcy watching your real contracts?</p><div class="try-actions">' +
-      '<a class="btn btn-primary" href="beta.html">Join the beta</a><a class="btn btn-ghost" href="industries/index.html">Watch the 1-minute video for your industry</a></div></div>';
+    h += nextStepHtml(s, L);
+    h += '<div class="try-actions">' + btn("go", "See the updated dashboard", "btn-ghost", ' data-n="1" data-fk="l-dash"') + "</div>";
     return h + "</div>";
   }
 
+  // The next step after go-live: the result in one line, then sign up (the site's usual beta link, nothing typed here
+  // goes with it), or run it again the other way.
+  function nextStepHtml(s, L) {
+    const v = savings(s), P = nums();
+    let big, sub;
+    if (v.year > 0) {
+      big = "You’d save " + money(v.year) + " a year";
+      sub = (s.term > 12 ? money(v.term) + " over the " + s.term + "-month term, compared" : "Compared") + " with renewing at Tallowbird’s " + money(P.quote) + " quote.";
+    } else if (v.year < 0) {
+      big = "This choice costs " + money(-v.year) + " a year more";
+      sub = "than renewing at Tallowbird’s " + money(P.quote) + " quote, for the terms you preferred. Connexcy shows that trade-off before anyone signs.";
+    } else {
+      big = P.up > 0 ? "Renewing as quoted costs " + money(P.up) + " a year more than today" : "Renewed at today’s price";
+      sub = "Alerts months before the notice deadline leave time to compare, push back or switch.";
+    }
+    const other = L.switched ? "renewal" : "moss";
+    return '<section class="try-next" aria-labelledby="try-next-h"><h3 id="try-next-h">Do this with your real contracts</h3>' +
+      '<p class="try-next-tag">' + (P.custom ? "With your numbers" : "With the example numbers") + '</p><p class="try-next-big">' + big + '</p><p class="try-next-sub">' + sub + "</p>" +
+      "<p>Join the Connexcy beta and our team will help you load your contracts, check the key terms and set up your alerts and approval chain.</p>" +
+      '<div class="try-actions"><a class="btn btn-primary" href="beta.html" data-fk="next-beta">Join the beta</a>' +
+      '<button type="button" class="btn btn-ghost-light" data-act="other-path" data-id="' + other + '" data-fk="next-other">Try the other path: ' + (other === "moss" ? "switch to Mossgate" : "renew with Tallowbird") + "</button>" +
+      '<button type="button" class="btn btn-ghost-light" data-act="reset" data-fk="l-reset">Start over</button></div></section>';
+  }
+
   function logHtml() {
-    return S.log.map((l) => '<li class="' + (l.kind ? "k-" + l.kind : "") + '"><time>' + l.t + "</time>" + esc(l.text) + "</li>").join("");
+    return S.log.map((l) => '<li class="' + (l.kind ? "k-" + l.kind : "") + '"><time>' + l.t + "</time>" + esc(typeof l.text === "function" ? l.text() : l.text) + "</li>").join("");
   }
 
   function render(opts) {
@@ -755,7 +938,32 @@
     if (act === "reset") {
       reset();
       render({ focus: "heading", scroll: true });
-      announce("Started over. Today is " + fmtLong(today()) + ".");
+      announce("Started over with the example numbers. Today is " + fmtLong(today()) + ".");
+    } else if (act === "other-path") {
+      // Same numbers, back at the day the quote arrives, with the other option picked on the Compare step.
+      const id = b.getAttribute("data-id");
+      reset(true);
+      advanceTo(QUOTE_DAY);
+      S.pick = id;
+      log("You started over to try the other path: " + (id === "moss" ? "switching to Mossgate." : "renewing with Tallowbird."));
+      goStep(3, "Started over with the same numbers, on " + fmtLong(today()) + ", when Tallowbird’s quote arrived. " + spec(id).name + " is picked.");
+    } else if (act === "nums-toggle") {
+      numsUI.open = !numsUI.open;
+      numsUI.errs = {};
+      if (numsUI.open) numsUI.draft = draftFrom();
+      render({ focus: numsUI.open ? "num-today" : "nums-toggle" });
+    } else if (act === "nums-example") {
+      const was = NUM.custom;
+      NUM = Object.assign({ custom: false }, EXAMPLE);
+      numsUI = freshNumsUI();
+      if (was) numsChanged();
+      render({ focus: "nums-toggle" });
+      announce(numsSummary());
+    } else if (act === "nums-restart") {
+      reset(true);
+      numsUI.open = true; numsUI.errs = {}; numsUI.draft = draftFrom();
+      render({ focus: "num-today", scroll: true });
+      announce("Started over with the same numbers. Change them in the form, then choose Use these numbers.");
     } else if (act === "go") {
       goStep(n);
     } else if (act === "skip") {
@@ -794,12 +1002,15 @@
       log("You asked Tallowbird’s account manager to match Mossgate’s price.");
       render({ focus: "pick-" + S.pick });
       announce("Asked Tallowbird to match. Waiting for their reply.");
+      const round = S.matchRound;
       later(2400, () => {
+        if (S.matchRound !== round || S.match !== "asked") return; // the numbers changed while waiting
+        const price = money(nums().alt24);
         S.match = "ready";
         tick(25);
-        log("Tallowbird will match: $44,400/yr if you sign for 24 months. You uploaded their new quote and its terms filled in.", "good");
+        log("Tallowbird will match: " + price + "/yr if you sign for 24 months. You uploaded their new quote and its terms filled in.", "good");
         if (S.step === 3) render();
-        announce("Tallowbird replied: they’ll match $44,400 a year for 24 months. It’s now an option in the comparison.");
+        announce("Tallowbird replied: they’ll match " + price + " a year for 24 months. It’s now an option in the comparison.");
       });
     } else if (act === "send") {
       submit(b.getAttribute("data-id"));
@@ -860,8 +1071,8 @@
         if (id === "match") S.match = "ready";
         S.pick = id;
         tick(40);
-        log(REVISED[id] + " You uploaded it and its terms filled in.", "good");
-        goStep(3, REVISED[id]);
+        log(revisedText(id) + " You uploaded it and its terms filled in.", "good");
+        goStep(3, revisedText(id));
       });
     } else if (act === "golive") {
       const s = S.sub.spec;
@@ -879,7 +1090,8 @@
       S.feed.unshift({ id: "live", ico: "✅", day: S.day, title: s.vendor + " is now the active help desk contract", body: "Alerts set for " + listJoin(S.live.alerts) + ".", to: "robin" });
       S.freshIds = ["live"];
       render({ focus: "heading", scroll: true });
-      announce(s.vendor + " is now the active contract. " + (v.year ? "Saved " + money(v.year) + " this year and " + money(v.term) + " over the term, compared with the renewal quote." : "Renewed at the quoted price: " + money(-v.vsToday) + " a year more than last year."));
+      announce(s.vendor + " is now the active contract. " + (v.year > 0 ? "Saved " + money(v.year) + " this year and " + money(v.term) + " over the term, compared with the renewal quote."
+        : v.year < 0 ? "It costs " + money(-v.year) + " a year more than the renewal quote." : v.vsToday < 0 ? "Renewed at the quoted price: " + money(-v.vsToday) + " a year more than last year." : "Renewed at the quoted price."));
     }
   });
 
@@ -889,15 +1101,40 @@
       S.pick = t.value;
       render();
       const s = spec(S.pick), v = savings(s);
-      announce(s.name + " picked: " + money(s.price) + " a year. " + (v.year ? "Saves " + money(v.year) + " a year and " + money(v.term) + " over the term, compared with the renewal quote." : "No savings: this is the renewal quote."));
+      announce(s.name + " picked: " + money(s.price) + " a year. " + (v.year > 0 ? "Saves " + money(v.year) + " a year and " + money(v.term) + " over the term, compared with the renewal quote."
+        : v.year < 0 ? "Costs " + money(-v.year) + " a year more than the renewal quote, " + money(-v.term) + " over the term." : "Same price as the renewal quote."));
     } else if (t.name === "try-moss") {
       S.moss = Number(t.value);
       render();
       const s = spec("moss"), v = savings(s);
-      announce("Mossgate for " + s.term + " months: " + money(s.price) + " a year. Saves " + money(v.year) + " a year, " + money(v.term) + " over the term.");
+      announce("Mossgate for " + s.term + " months: " + money(s.price) + " a year. " + (v.year > 0 ? "Saves " + money(v.year) + " a year, " + money(v.term) + " over the term."
+        : v.year < 0 ? "Costs " + money(-v.year) + " a year more than the renewal quote." : "Same price as the renewal quote."));
+    } else if (t.name === "try-qmode") {
+      numsUI.draft.mode = t.value;
+      render();
     }
   });
+  app.addEventListener("submit", (e) => {
+    if (e.target.id !== "try-nums-form") return;
+    e.preventDefault();
+    const r = checkNums(numsUI.draft);
+    const bad = ["today", "pct", "quote", "alt"].filter((k) => r.errs[k]);
+    if (bad.length) {
+      numsUI.errs = r.errs;
+      render({ focus: "num-" + bad[0] });
+      announce("Check the numbers: " + r.errs[bad[0]]);
+      return;
+    }
+    if (r.val.mode === "pct") r.val.quote = Math.round(r.val.today * (1 + r.val.pct / 100));
+    NUM = r.val;
+    numsUI = freshNumsUI();
+    numsChanged();
+    render({ focus: "nums-toggle" });
+    announce(numsSummary());
+  });
   app.addEventListener("input", (e) => {
+    const k = e.target.getAttribute && e.target.getAttribute("data-num");
+    if (k && numsUI.draft) numsUI.draft[k] = e.target.value;
     if (e.target.id === "try-nudge-note") S.nudgeNote = e.target.value;
     if (e.target.id === "try-appr-note") S.apprNote = e.target.value;
   });

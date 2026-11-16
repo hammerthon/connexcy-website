@@ -350,3 +350,45 @@
 .try-new { margin: 0 0 14px; }
 .try-new h3 { margin: 0 0 6px; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--amber-text); }
 .try-new-none { margin: 0 0 14px; font-size: .86rem; color: var(--muted); }
+
+/* "Use your own numbers" (Contracts and Compare steps) */
+.try-nums { margin: 0 0 16px; border: 1.5px dashed #c7d6f5; border-radius: 14px; background: var(--bg-soft); }
+.try-nums.is-custom { border-style: solid; border-color: var(--brand); background: var(--brand-soft); }
+.try-nums-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; padding: 12px 14px; }
+.try-nums-sum { min-width: 0; flex: 1 1 340px; }
+.try-nums-sum h3 { margin: 0 0 2px; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--brand-strong); }
+.try-nums-figs { display: flex; flex-wrap: wrap; gap: 2px 14px; margin: 0; font-size: .88rem; color: var(--ink-2); }
+.try-nums-figs b { color: var(--ink); }
+.try-nums-appr { margin: 4px 0 0; font-size: .82rem; color: var(--ink-2); }
+.try-nums-appr b { color: var(--ink); }
+.try-nums-btns { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.try-nums-btns p { margin: 0; font-size: .8rem; }
+.try-nums-form { padding: 14px; border-top: 1px solid var(--line); background: #fff; border-radius: 0 0 12px 12px; }
+.try-nums-note { margin: 0 0 12px; font-size: .84rem; color: var(--muted); }
+.try-nums-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: start; }
+.try-field { min-width: 0; margin: 0; padding: 0; border: 0; }
+.try-field > legend, .try-field > label { display: block; margin: 0 0 4px; padding: 0; font-size: .8rem; font-weight: 700; color: var(--ink); }
+.try-field .try-qmode { margin: 0 0 8px; }
+.try-field .try-qmode label { font-size: .78rem; padding: 4px 10px; }
+.try-input { display: flex; align-items: center; border: 1.5px solid var(--line); border-radius: 10px; background: #fff; }
+.try-input:focus-within { border-color: var(--brand); outline: 3px solid var(--brand); outline-offset: 2px; }
+.try-input.is-bad { border-color: var(--red-500); background: #fffafa; }
+.try-input .aff { padding: 0 0 0 10px; font-weight: 700; color: var(--muted); }
+.try-input .aff:last-child { padding: 0 10px 0 0; }
+.try-input input { flex: 1; min-width: 0; width: 100%; padding: 8px 10px; border: 0; border-radius: 10px; background: transparent; font: inherit; font-size: .95rem; font-weight: 700; color: var(--ink); }
+.try-app .try-input input:focus-visible { outline: none; } /* the ring goes on .try-input, around the $ and % too */
+.try-field small { display: block; margin-top: 4px; font-size: .76rem; line-height: 1.4; color: var(--muted); }
+.try-err { margin: 4px 0 0; font-size: .8rem; font-weight: 700; line-height: 1.4; color: var(--red-text); }
+@media (max-width: 760px) { .try-nums-grid { grid-template-columns: 1fr; } .try-nums-btns { width: 100%; } }
+
+/* The next step after go-live */
+.try-next { margin-top: 18px; padding: 22px 20px; border-radius: 16px; text-align: center; color: #fff; background: linear-gradient(160deg, var(--deep-2), var(--deep)); animation: try-pop .4s ease; }
+.try-next h3 { margin: 0 0 12px; font-size: 1.2rem; color: #fff; }
+.try-next p { margin: 0 auto 12px; max-width: 560px; color: var(--on-deep-muted); }
+.try-next .try-next-tag { margin-bottom: 2px; font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.try-next .try-next-big { margin-bottom: 4px; font-size: clamp(1.45rem, 3.6vw, 2rem); font-weight: 800; line-height: 1.2; color: var(--accent); }
+.try-next .try-next-sub { margin-bottom: 14px; font-size: .9rem; color: #fff; }
+.try-next .try-actions { justify-content: center; margin-top: 4px; }
+.try-app .try-next :focus-visible { outline-color: var(--accent); }
+@media (max-width: 560px) { .try-next { padding: 18px 14px; } .try-next .try-actions .btn { width: 100%; justify-content: center; } }
+@media (prefers-reduced-motion: reduce) { .try-next { animation: none; } }
