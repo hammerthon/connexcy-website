@@ -5,6 +5,9 @@ A static site (plain HTML, CSS and JavaScript). No build step, no database to ru
 ## Pages
 - `index.html`: Home (hero, dashboard preview, problems, how it works, features, savings calculator, free guide, testimonials, FAQ)
 - `features.html`, `pricing.html`, `beta.html` (beta / demo form), `about.html`
+- `try.html` (/try): the hands-on demo (no sign-up, made-up data), linked as "Try it" in every page's header and from the
+  home page's `#try` section. It runs entirely in the browser (`assets/try.js`, `assets/try.css`; the data is at the top of
+  `try.js`): no network calls, no cookies, nothing saved. Keep it to what the app really does.
 - `privacy.html`, `terms.html`: placeholders, have an attorney review them before launch
 - `industries/index.html` (all six industries) and one page per industry: `industries/saas.html`, `ecommerce.html`,
   `restaurants.html`, `healthcare.html`, `financial-services.html`, `professional-services.html` (see "Industries" below)

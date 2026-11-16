@@ -27,7 +27,7 @@
        skips for reduced motion, high-contrast themes, blocked site storage and browsers too old to draw it, and
        ?intro in the address plays it again. -->
   <script>(function(){var d=document.documentElement,q=function(m){try{return matchMedia(m).matches}catch(e){return false}},ok=false,seen=document.referrer.indexOf(location.origin+"/")===0;try{ok=CSS.supports("transform","rotate(atan2(1px, 1px))")}catch(e){}try{seen=seen||!!sessionStorage.getItem("cx-intro");sessionStorage.setItem("cx-intro","1")}catch(e){seen=true}if(!ok||q("(prefers-reduced-motion: reduce)")||q("(forced-colors: active)")||(seen&&!/[?&]intro\b/.test(location.search)))d.classList.add("intro-seen");else d.classList.add("cxi-play")})();</script>
-  <link rel="stylesheet" href="assets/styles.css?v=4">
+  <link rel="stylesheet" href="assets/styles.css?v=5">
   <link rel="stylesheet" href="assets/intro.css?v=1">
   <noscript><style>.reveal{opacity:1;transform:none}.nav-dd:hover .nav-dd-panel,.nav-dd:focus-within .nav-dd-panel{display:block}</style></noscript>
   <script type="application/ld+json">
@@ -121,6 +121,7 @@
       <li><a href="pricing.html">Pricing</a></li>
       <li><a href="https://app.connexcy.com/reviews">Vendor reviews</a></li>
       <li><a href="index.html#faq">FAQ</a></li>
+      <li><a class="nav-try" href="try.html">Try it</a></li>
     </ul>
     <div class="nav-cta">
       <a class="btn btn-ghost" href="beta.html?type=demo">Book a demo</a>
@@ -219,6 +220,31 @@
         <p>And that telecom bill? Every invoice is matched to its contract, so anything that doesn’t match, like an unapproved rate increase, is flagged before you pay. Every contract, every deadline, every invoice, all in one place, with time to act.</p>
         <p>Stop paying for renewals you didn’t choose. Connexcy is in beta now. Join the beta, and our team will help you get set up. Or book a demo, at connexcy.com.</p>
       </details>
+    </div>
+  </section>
+
+  <!-- TRY IT: sends visitors to the hands-on demo (try.html, assets/try.js) -->
+  <section class="section try-teaser" id="try">
+    <div class="container">
+      <div class="try-teaser-card reveal">
+        <div>
+          <span class="eyebrow">Try it yourself, no sign-up</span>
+          <h2>Run a renewal, from the first alert to the new contract</h2>
+          <ul class="checklist">
+            <li>Skip ahead in time and watch the 90, 60 and 30-day alerts reach the contract’s owner.</li>
+            <li>Compare a 12% renewal increase with another vendor’s quote and see the savings add up.</li>
+            <li>Nudge an approver, or approve it yourself, and make the winner your active contract.</li>
+          </ul>
+          <a class="btn btn-primary" href="try.html">Try the demo</a>
+          <p class="fine-print">Uses made-up example data. Nothing you type is saved or sent.</p>
+        </div>
+        <div class="try-teaser-mock" aria-hidden="true">
+          <div class="mini-item"><span><strong>Tallowbird Helpdesk</strong><small>$48,000/yr · renews Mar 1</small></span><span class="badge badge-amber">Notice due in 60 days</span></div>
+          <div class="mini-item"><span><strong>Renewal quote</strong><small>$53,760/yr</small></span><span class="badge badge-red">+12%</span></div>
+          <div class="mini-item"><span><strong>Mossgate Support</strong><small>$44,400/yr · 24 months</small></span><span class="badge badge-green">Save $9,360/yr</span></div>
+          <div class="appr-toast">👋 Nudge sent to Priya, Head of Customer Support</div>
+        </div>
+      </div>
     </div>
   </section>
 
