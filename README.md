@@ -14,7 +14,7 @@ A static site (plain HTML, CSS and JavaScript). No build step, no database to ru
 
 ## Editing
 - Text: edit the HTML files directly.
-- Prices: edit the numbers in `pricing.html` (Starter $49/mo, Growth $199/mo).
+- Prices: edit the numbers in `pricing.html` (Free up to 10 contracts, Starter $99/mo, Growth $349/mo). The app has the same plans in `connexy-app/plans.py`, and Stripe has the prices: change all three together.
 - Colors and fonts: the variables at the top of `assets/styles.css` (the "Electric blue" colors; `--logo-main` and `--logo-accent` color the logo).
 - Testimonials: replace the `[placeholder]` cards on the home page and remove the "Placeholder" tags.
 - LinkedIn link: in the footer of every page (`https://www.linkedin.com/company/connexcy/`).
