@@ -9,6 +9,13 @@ A static site (plain HTML, CSS and JavaScript). No build step, no database to ru
   home page's `#try` section. It runs entirely in the browser (`assets/try.js`, `assets/try.css`; the data is at the top of
   `try.js`): no network calls, no cookies, nothing saved. Keep it to what the app really does.
 - `privacy.html`, `terms.html`: placeholders, have an attorney review them before launch
+- `referral.html` (/referral): the referral program. For every referred business that becomes a paying customer the
+  referrer gets both one month of Connexcy free and $100. Linked from every page's footer ("Refer a business") and
+  the About page. Its form (`form-name` "referral") goes to the app's Website leads like the others; the details about
+  the referred business are marked `data-msg-label` and sent in the `message` field (the form has
+  `data-compose-message`; see `assets/main.js`). Its video is made in `/Users/hammer/connexcy-referral-video`:
+  `assets/referral/referral.mp4`, `referral.vtt`, `referral-poster.jpg`; keep the VideoObject `duration` in the page's
+  `<head>` and the length on its "Watch" button in step with the video.
 - `industries/index.html` (all six industries) and one page per industry: `industries/saas.html`, `ecommerce.html`,
   `restaurants.html`, `healthcare.html`, `financial-services.html`, `professional-services.html` (see "Industries" below)
 
@@ -18,7 +25,10 @@ A static site (plain HTML, CSS and JavaScript). No build step, no database to ru
 - Colors and fonts: the variables at the top of `assets/styles.css` (the "Electric blue" colors; `--logo-main` and `--logo-accent` color the logo).
 - Testimonials: replace the `[placeholder]` cards on the home page and remove the "Placeholder" tags.
 - LinkedIn link: in the footer of every page (`https://www.linkedin.com/company/connexcy/`).
-- Contact email: `hello@connexcy.com` throughout, plus `CONTACT_EMAIL` in `assets/main.js`.
+- Contact email: `hello@connexcy.com` throughout, plus `CONTACT_EMAIL` in `assets/main.js`. Role addresses (all aliases
+  of the hello@ mailbox, so they land in the same inbox): `support@` (footer "Support", terms), `sales@` (pricing),
+  `billing@` (terms), `privacy@` (privacy policy), `security@` (`.well-known/security.txt`; renew its `Expires` date
+  every year), listed together on the About page. The app sends from `alerts@` and links to `help@`, also aliases.
 
 ## Logo and intro
 - Logo ("Corner link", two documents joined at their folded corners): inline SVG in the header, the footer and the intro
@@ -53,6 +63,12 @@ A static site (plain HTML, CSS and JavaScript). No build step, no database to ru
   returning visitors get the new file instead of their cached copy.
 
 ## Explainer video
+Every film on the site (home, industries, referral) starts by itself, muted with its captions showing, once half of
+it is on screen (on the home page, after the intro), because browsers only allow muted autoplay. "Tap for sound"
+restarts it with sound; the hero's "Watch the video" link also starts the home film with sound. It pauses when
+scrolled away while still playing muted by itself, and a pause by the visitor is respected. No autoplay for reduced
+motion or data saving. The code is `autoplay()` in `assets/main.js`; the button is `.video-sound` in `styles.css`.
+
 The home page's "See it in under 3 minutes" section (`#video`, linked from the hero) plays the 2:46 explainer:
 `assets/connexcy-explainer.mp4` (1080p, about 28 MB, loaded only when someone presses play), its captions
 `assets/connexcy-explainer.vtt`, and its poster `assets/connexcy-explainer-poster.jpg` (the film's logo frame, so the

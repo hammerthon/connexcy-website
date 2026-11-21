@@ -27,7 +27,7 @@
        skips for reduced motion, high-contrast themes, blocked site storage and browsers too old to draw it, and
        ?intro in the address plays it again. -->
   <script>(function(){var d=document.documentElement,q=function(m){try{return matchMedia(m).matches}catch(e){return false}},ok=false,seen=document.referrer.indexOf(location.origin+"/")===0;try{ok=CSS.supports("transform","rotate(atan2(1px, 1px))")}catch(e){}try{seen=seen||!!sessionStorage.getItem("cx-intro");sessionStorage.setItem("cx-intro","1")}catch(e){seen=true}if(!ok||q("(prefers-reduced-motion: reduce)")||q("(forced-colors: active)")||(seen&&!/[?&]intro\b/.test(location.search)))d.classList.add("intro-seen");else d.classList.add("cxi-play")})();</script>
-  <link rel="stylesheet" href="assets/styles.css?v=5">
+  <link rel="stylesheet" href="assets/styles.css?v=6">
   <link rel="stylesheet" href="assets/intro.css?v=1">
   <noscript><style>.reveal{opacity:1;transform:none}.nav-dd:hover .nav-dd-panel,.nav-dd:focus-within .nav-dd-panel{display:block}</style></noscript>
   <script type="application/ld+json">
@@ -142,8 +142,9 @@
     <div class="container hero-grid">
       <div>
         <span class="pill"><span class="dot"></span> Now accepting beta customers</span>
+        <p class="hero-what"><strong>Connexcy</strong> is software that tracks your vendor contracts and invoices, so renewals and overcharges never catch you by surprise.</p>
         <h1>Never miss a contract <span>renewal</span> again.</h1>
-        <p class="lead">Connexcy keeps every vendor contract and invoice in one place, alerts you before anything renews or expires, sends renewals to the right people for you, and flags overcharges before you pay them.</p>
+        <p class="lead">Put every vendor contract and invoice in one place. Connexcy alerts you before anything renews or expires, sends renewals to the right people to approve, and flags overcharges before you pay them.</p>
         <div class="hero-ctas">
           <a class="btn btn-primary" href="beta.html">Join the beta</a>
           <a class="btn btn-ghost" href="beta.html?type=demo">Book a demo</a>
@@ -579,6 +580,8 @@
           <li><a href="beta.html">Join the beta</a></li>
           <li><a href="beta.html?type=demo">Book a demo</a></li>
           <li><a href="mailto:hello@connexcy.com">Contact</a></li>
+          <li><a href="mailto:support@connexcy.com">Support</a></li>
+          <li><a href="referral.html">Refer a business</a></li>
         </ul>
       </div>
       <div>
@@ -597,6 +600,6 @@
 </footer>
 
 <script src="assets/intro.js?v=1"></script>
-<script src="assets/main.js?v=4"></script>
+<script src="assets/main.js?v=6"></script>
 </body>
 </html>

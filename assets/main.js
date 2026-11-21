@@ -44,7 +44,80 @@ const CONTACT_EMAIL = "hello@connexcy.com";
     };
     play.addEventListener("click", start);
     video.addEventListener("play", () => { frame.classList.add("is-playing"); video.controls = true; });
+    autoplay(frame, video);
   });
+
+  // Autoplay: browsers only let a video start by itself when it's muted, so each film starts muted, with its captions
+  // showing, once at least half of it is on screen (and, on the home page, once the intro has finished). A "Tap for
+  // sound" button turns the sound on and starts the film from the beginning. While it's still playing muted by
+  // itself, it pauses when scrolled away and picks up again when it's back. Not for people who ask for reduced motion
+  // or to save data; if the browser refuses (some battery-saving modes do), the big "Watch" button stays as before.
+  // Links to "#video" (the hero's "Watch the video") start the home film with sound, since the visitor asked for it.
+  function autoplay(frame, video) {
+    const q = (m) => { try { return window.matchMedia(m).matches; } catch (e) { return false; } };
+    const saveData = navigator.connection && navigator.connection.saveData;
+    if (q("(prefers-reduced-motion: reduce)") || saveData || !("IntersectionObserver" in window)) return;
+    const html = document.documentElement;
+    // Films whose words are already on screen (no narration, like the referral film) set data-auto-captions="off",
+    // so the captions don't cover the picture; they stay in the player's menu.
+    const track = video.dataset.autoCaptions === "off" ? null : video.textTracks && video.textTracks[0];
+    const sound = document.createElement("button");
+    sound.type = "button";
+    sound.className = "video-sound";
+    sound.hidden = true;
+    sound.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>Tap for sound';
+    frame.appendChild(sound);
+    let auto = false;     // playing muted by itself (not started by the visitor)
+    let visible = false;
+    const introRunning = () => html.classList.contains("cxi-play") && !html.classList.contains("cxi-done");
+    const tryPlay = () => {
+      if (!visible || introRunning() || frame.dataset.autoplayed === "user") return;
+      if (!video.paused) return;
+      if (frame.dataset.autoplayed && !auto) return; // the visitor paused it: leave it paused
+      auto = true;
+      frame.dataset.autoplayed = "auto";
+      video.muted = true;
+      video.preload = "auto";
+      if (track) track.mode = "showing";
+      const p = video.play();
+      if (p && p.then) p.then(() => { sound.hidden = !video.muted; }).catch(() => { auto = false; delete frame.dataset.autoplayed; });
+    };
+    const withSound = () => {
+      auto = false;
+      frame.dataset.autoplayed = "user";
+      sound.hidden = true;
+      video.muted = false;
+      if (track) track.mode = "hidden";
+      try { video.currentTime = 0; } catch (e) {}
+      frame.classList.add("is-playing");
+      video.controls = true;
+      const p = video.play();
+      if (p && p.catch) p.catch(() => {});
+    };
+    sound.addEventListener("click", withSound);
+    video.addEventListener("volumechange", () => { if (!video.muted) { auto = false; frame.dataset.autoplayed = "user"; sound.hidden = true; } });
+    // A pause the visitor makes (not one from scrolling away) ends the autoplay for this film.
+    let scrollPause = false;
+    video.addEventListener("pause", () => {
+      if (scrollPause) { scrollPause = false; if (visible) tryPlay(); return; }
+      if (auto && !video.ended) { auto = false; sound.hidden = true; }
+    });
+    video.addEventListener("ended", () => { auto = false; sound.hidden = true; });
+    new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        visible = e.intersectionRatio >= 0.5;
+        if (visible) tryPlay();
+        else if (auto && !video.paused) { scrollPause = true; video.pause(); }
+      });
+    }, { threshold: [0, 0.5] }).observe(frame);
+    if (introRunning()) {
+      new MutationObserver((_, mo) => { if (!introRunning()) { mo.disconnect(); tryPlay(); } })
+        .observe(html, { attributes: true, attributeFilter: ["class"] });
+    }
+    if (frame.closest("#video")) {
+      document.querySelectorAll('a[href="#video"], a[href="index.html#video"]').forEach((a) => a.addEventListener("click", withSound));
+    }
+  }
 
   // Mobile menu
   const header = document.querySelector(".site-header");
@@ -200,6 +273,16 @@ const CONTACT_EMAIL = "hello@connexcy.com";
 
       const data = new FormData(form);
       data.set("submitted_at", new Date().toISOString());
+      // The app keeps a fixed set of fields (name, email, company, message, ...). Forms with extra details (the
+      // referral form's "business you're referring") mark them with data-msg-label, and they go in the message.
+      if (form.hasAttribute("data-compose-message")) {
+        const lines = [];
+        form.querySelectorAll("[data-msg-label]").forEach((el) => {
+          const v = (el.value || "").trim();
+          if (v) lines.push(`${el.dataset.msgLabel}: ${v}`);
+        });
+        data.set("message", lines.join("\n"));
+      }
       if (status) { status.textContent = ""; status.classList.remove("error"); }
       if (btn) { btn.disabled = true; btn.dataset.label = btn.textContent; btn.textContent = "Sending…"; }
 
